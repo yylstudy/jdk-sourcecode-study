@@ -318,7 +318,7 @@ public class HashMap<K,V> extends a.collectionSourceCode.AbstractMap<K,V>
         else if (oldThr > 0) // initial capacity was placed in threshold
             newCap = oldThr;
      // oldCap = 0并且oldThr = 0，使用缺省值（如使用HashMap()构造函数，之后再插入一个元素会调用resize函数，会进入这一步）
-        else {               // zero initial threshold signifies using defaults
+        else {               // zero initial threshold sign ifies using defaults
             newCap = DEFAULT_INITIAL_CAPACITY;
             newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
         }
@@ -345,7 +345,9 @@ public class HashMap<K,V> extends a.collectionSourceCode.AbstractMap<K,V>
                     else if (e instanceof TreeNode)
                         ((TreeNode<K,V>)e).split(this, newTab, j, oldCap);
                     else { // preserve order
+                    	//第一条链表的头结点、尾节点，根据e.hash&oldCap是否等于0进行判断
                         Node<K,V> loHead = null, loTail = null;
+                        //第二条链表的头结点、尾节点，根据e.hash&oldCap是否等于0进行判断
                         Node<K,V> hiHead = null, hiTail = null;
                         Node<K,V> next;
                      // 将同一桶中的元素根据(e.hash & oldCap)是否为0进行分割，分成两个不同的链表，完成rehash

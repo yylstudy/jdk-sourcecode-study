@@ -40,89 +40,15 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Consumer;
 
-/**
- * Doubly-linked list implementation of the {@code List} and {@code Deque}
- * interfaces.  Implements all optional list operations, and permits all
- * elements (including {@code null}).
- *
- * <p>All of the operations perform as could be expected for a doubly-linked
- * list.  Operations that index into the list will traverse the list from
- * the beginning or the end, whichever is closer to the specified index.
- *
- * <p><strong>Note that this implementation is not synchronized.</strong>
- * If multiple threads access a linked list concurrently, and at least
- * one of the threads modifies the list structurally, it <i>must</i> be
- * synchronized externally.  (A structural modification is any operation
- * that adds or deletes one or more elements; merely setting the value of
- * an element is not a structural modification.)  This is typically
- * accomplished by synchronizing on some object that naturally
- * encapsulates the list.
- *
- * If no such object exists, the list should be "wrapped" using the
- * {@link Collections#synchronizedList Collections.synchronizedList}
- * method.  This is best done at creation time, to prevent accidental
- * unsynchronized access to the list:<pre>
- *   List list = Collections.synchronizedList(new LinkedList(...));</pre>
- *
- * <p>The iterators returned by this class's {@code iterator} and
- * {@code listIterator} methods are <i>fail-fast</i>: if the list is
- * structurally modified at any time after the iterator is created, in
- * any way except through the Iterator's own {@code remove} or
- * {@code add} methods, the iterator will throw a {@link
- * ConcurrentModificationException}.  Thus, in the face of concurrent
- * modification, the iterator fails quickly and cleanly, rather than
- * risking arbitrary, non-deterministic behavior at an undetermined
- * time in the future.
- *
- * <p>Note that the fail-fast behavior of an iterator cannot be guaranteed
- * as it is, generally speaking, impossible to make any hard guarantees in the
- * presence of unsynchronized concurrent modification.  Fail-fast iterators
- * throw {@code ConcurrentModificationException} on a best-effort basis.
- * Therefore, it would be wrong to write a program that depended on this
- * exception for its correctness:   <i>the fail-fast behavior of iterators
- * should be used only to detect bugs.</i>
- *
- * <p>This class is a member of the
- * <a href="{@docRoot}/../technotes/guides/collections/index.html">
- * Java Collections Framework</a>.
- *
- * @author  Josh Bloch
- * @see     List
- * @see     ArrayList
- * @since 1.2
- * @param <E> the type of elements held in this collection
- */
-
 public class LinkedList<E>
     extends AbstractSequentialList<E>
     implements List<E>, Deque<E>, Cloneable, java.io.Serializable
 {
 	//元素的实际个数
     transient int size = 0;
-
-    /**
-     * Pointer to first node.
-     * Invariant: (first == null && last == null) ||
-     *            (first.prev == null && first.item != null)
-     */
-    
-    /**
-     * transient关键字的作用
-		一个对象只要实现了Serilizable接口，这个对象就可以被序列化,
-		java的这种序列化模式为开发者提供了很多便利，可以不必关系具体序列化的过程，
-		只要这个类实现了Serilizable接口，这个的所有属性和方法都会自动序列化。
-		但是有种情况是有些属性是不需要序列号的，所以就用到这个关键字。只需要实现Serilizable接口，
-		将不需要序列化的属性前添加关键字transient, 序列化对象的时候，
-		这个属性就不会序列化到指定的目的地中。
-     */
   //首节点
     transient Node<E> first;
 
-    /**
-     * Pointer to last node.
-     * Invariant: (first == null && last == null) ||
-     *            (last.next == null && last.item != null)
-     */
   //尾节点
     transient Node<E> last;
 
@@ -132,22 +58,11 @@ public class LinkedList<E>
     public LinkedList() {
     }
 
-    /**
-     * Constructs a list containing the elements of the specified
-     * collection, in the order they are returned by the collection's
-     * iterator.
-     *
-     * @param  c the collection whose elements are to be placed into this list
-     * @throws NullPointerException if the specified collection is null
-     */
     public LinkedList(Collection<? extends E> c) {
         this();
         addAll(c);
     }
 
-    /**
-     * Links e as first element.
-     */
   //添加元素作为第一个节点
     private void linkFirst(E e) {
         final Node<E> f = first;
@@ -200,7 +115,6 @@ public class LinkedList<E>
         size++;
         modCount++;
     }
-
     /**
      * Unlinks non-null first node f.
      */
@@ -364,6 +278,7 @@ public class LinkedList<E>
     public boolean contains(Object o) {
         return indexOf(o) != -1;
     }
+    
 
     /**
      * Returns the number of elements in this list.
@@ -639,19 +554,7 @@ public class LinkedList<E>
         }
     }
 
-    // Search Operations
-
-    /**
-     * Returns the index of the first occurrence of the specified element
-     * in this list, or -1 if this list does not contain the element.
-     * More formally, returns the lowest index {@code i} such that
-     * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
-     * or -1 if there is no such index.
-     *
-     * @param o element to search for
-     * @return the index of the first occurrence of the specified element in
-     *         this list, or -1 if this list does not contain the element
-     */
+   
     public int indexOf(Object o) {
         int index = 0;
         if (o == null) {
@@ -1029,7 +932,7 @@ public class LinkedList<E>
     }
 
     private static class Node<E> {
-        E item; //当前节点
+        E item; //当前元素
         Node<E> next; //后节点
         Node<E> prev; //前节点
 

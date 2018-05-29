@@ -42,162 +42,25 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-/**
- * This class implements the <tt>Map</tt> interface with a hash table, using
- * reference-equality in place of object-equality when comparing keys (and
- * values).  In other words, in an <tt>IdentityHashMap</tt>, two keys
- * <tt>k1</tt> and <tt>k2</tt> are considered equal if and only if
- * <tt>(k1==k2)</tt>.  (In normal <tt>Map</tt> implementations (like
- * <tt>HashMap</tt>) two keys <tt>k1</tt> and <tt>k2</tt> are considered equal
- * if and only if <tt>(k1==null ? k2==null : k1.equals(k2))</tt>.)
- *
- * <p><b>This class is <i>not</i> a general-purpose <tt>Map</tt>
- * implementation!  While this class implements the <tt>Map</tt> interface, it
- * intentionally violates <tt>Map's</tt> general contract, which mandates the
- * use of the <tt>equals</tt> method when comparing objects.  This class is
- * designed for use only in the rare cases wherein reference-equality
- * semantics are required.</b>
- *
- * <p>A typical use of this class is <i>topology-preserving object graph
- * transformations</i>, such as serialization or deep-copying.  To perform such
- * a transformation, a program must maintain a "node table" that keeps track
- * of all the object references that have already been processed.  The node
- * table must not equate distinct objects even if they happen to be equal.
- * Another typical use of this class is to maintain <i>proxy objects</i>.  For
- * example, a debugging facility might wish to maintain a proxy object for
- * each object in the program being debugged.
- *
- * <p>This class provides all of the optional map operations, and permits
- * <tt>null</tt> values and the <tt>null</tt> key.  This class makes no
- * guarantees as to the order of the map; in particular, it does not guarantee
- * that the order will remain constant over time.
- *
- * <p>This class provides constant-time performance for the basic
- * operations (<tt>get</tt> and <tt>put</tt>), assuming the system
- * identity hash function ({@link System#identityHashCode(Object)})
- * disperses elements properly among the buckets.
- *
- * <p>This class has one tuning parameter (which affects performance but not
- * semantics): <i>expected maximum size</i>.  This parameter is the maximum
- * number of key-value mappings that the map is expected to hold.  Internally,
- * this parameter is used to determine the number of buckets initially
- * comprising the hash table.  The precise relationship between the expected
- * maximum size and the number of buckets is unspecified.
- *
- * <p>If the size of the map (the number of key-value mappings) sufficiently
- * exceeds the expected maximum size, the number of buckets is increased.
- * Increasing the number of buckets ("rehashing") may be fairly expensive, so
- * it pays to create identity hash maps with a sufficiently large expected
- * maximum size.  On the other hand, iteration over collection views requires
- * time proportional to the number of buckets in the hash table, so it
- * pays not to set the expected maximum size too high if you are especially
- * concerned with iteration performance or memory usage.
- *
- * <p><strong>Note that this implementation is not synchronized.</strong>
- * If multiple threads access an identity hash map concurrently, and at
- * least one of the threads modifies the map structurally, it <i>must</i>
- * be synchronized externally.  (A structural modification is any operation
- * that adds or deletes one or more mappings; merely changing the value
- * associated with a key that an instance already contains is not a
- * structural modification.)  This is typically accomplished by
- * synchronizing on some object that naturally encapsulates the map.
- *
- * If no such object exists, the map should be "wrapped" using the
- * {@link Collections#synchronizedMap Collections.synchronizedMap}
- * method.  This is best done at creation time, to prevent accidental
- * unsynchronized access to the map:<pre>
- *   Map m = Collections.synchronizedMap(new IdentityHashMap(...));</pre>
- *
- * <p>The iterators returned by the <tt>iterator</tt> method of the
- * collections returned by all of this class's "collection view
- * methods" are <i>fail-fast</i>: if the map is structurally modified
- * at any time after the iterator is created, in any way except
- * through the iterator's own <tt>remove</tt> method, the iterator
- * will throw a {@link ConcurrentModificationException}.  Thus, in the
- * face of concurrent modification, the iterator fails quickly and
- * cleanly, rather than risking arbitrary, non-deterministic behavior
- * at an undetermined time in the future.
- *
- * <p>Note that the fail-fast behavior of an iterator cannot be guaranteed
- * as it is, generally speaking, impossible to make any hard guarantees in the
- * presence of unsynchronized concurrent modification.  Fail-fast iterators
- * throw <tt>ConcurrentModificationException</tt> on a best-effort basis.
- * Therefore, it would be wrong to write a program that depended on this
- * exception for its correctness: <i>fail-fast iterators should be used only
- * to detect bugs.</i>
- *
- * <p>Implementation note: This is a simple <i>linear-probe</i> hash table,
- * as described for example in texts by Sedgewick and Knuth.  The array
- * alternates holding keys and values.  (This has better locality for large
- * tables than does using separate arrays.)  For many JRE implementations
- * and operation mixes, this class will yield better performance than
- * {@link HashMap} (which uses <i>chaining</i> rather than linear-probing).
- *
- * <p>This class is a member of the
- * <a href="{@docRoot}/../technotes/guides/collections/index.html">
- * Java Collections Framework</a>.
- *
- * @see     System#identityHashCode(Object)
- * @see     Object#hashCode()
- * @see     Collection
- * @see     Map
- * @see     HashMap
- * @see     TreeMap
- * @author  Doug Lea and Josh Bloch
- * @since   1.4
- */
 
 public class IdentityHashMap<K,V>
     extends AbstractMap<K,V>
     implements Map<K,V>, java.io.Serializable, Cloneable
 {
-    /**
-     * The initial capacity used by the no-args constructor.
-     * MUST be a power of two.  The value 32 corresponds to the
-     * (specified) expected maximum size of 21, given a load factor
-     * of 2/3.
-     */
 	// 缺省容量大小
     private static final int DEFAULT_CAPACITY = 32;
 
-    /**
-     * The minimum capacity, used if a lower value is implicitly specified
-     * by either of the constructors with arguments.  The value 4 corresponds
-     * to an expected maximum size of 2, given a load factor of 2/3.
-     * MUST be a power of two.
-     */
  // 最小容量
     private static final int MINIMUM_CAPACITY = 4;
 
-    /**
-     * The maximum capacity, used if a higher value is implicitly specified
-     * by either of the constructors with arguments.
-     * MUST be a power of two <= 1<<29.
-     *
-     * In fact, the map can hold no more than MAXIMUM_CAPACITY-1 items
-     * because it has to have at least one slot with the key == null
-     * in order to avoid infinite loops in get(), put(), remove()
-     */
  // 最大容量
     private static final int MAXIMUM_CAPACITY = 1 << 29;
-
-    /**
-     * The table, resized as necessary. Length MUST always be a power of two.
-     */
  // 用于存储实际元素的表
     transient Object[] table; // non-private to simplify nested class access
 
-    /**
-     * The number of key-value mappings contained in this identity hash map.
-     *
-     * @serial
-     */
  // 大小
     int size;
 
-    /**
-     * The number of modifications, to support fast-fail iterators
-     */
     transient int modCount;
 
     /**
